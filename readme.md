@@ -14,7 +14,7 @@
 <p>用 cmd 运行到 项目的根目录，也就是 .env.example 文件的位置，运行 《ren .env.example .env 》 然后在.env文件里 填写数据库链接 如下：你自己准备好数据库</p>
            
 <p>DB_CONNECTION=mysql</p>
-<p>DB_HOST=120.25.107.206</p>
+<p>DB_HOST=IPLocation</p>
 <p>DB_PORT=3306</p>
 <p>DB_DATABASE=mysqlName</p>
 <p>DB_USERNAME=mysqlUserName</p>
