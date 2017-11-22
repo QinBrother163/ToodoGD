@@ -7,6 +7,23 @@ use Illuminate\Database\Eloquent\Model;
 class activity extends Model
 {
 
+    protected $fillable = [
+        'id',
+        'createDate',
+        'Flags',
+        'resultCode',
+        'orderID',
+        'needCnfm',
+        'custid',
+        'spID',
+        'devType',
+        'devNO',
+        'CARegionCode',
+        'serviceid',
+        'streamingNO'
+    ];
+
+
     protected $table = 'fsdp_activity_list_201710';
     public $primaryKey = 'id';
     public $timestamps = false;

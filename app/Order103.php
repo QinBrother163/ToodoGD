@@ -4,27 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class GdOrder extends Model
+class Order103 extends Model
 {
-
-    protected $fillable = [
-        'order_id',
-        'user_id',
-        'app_type',
-        'app_id',
-        'currency_type',
-        'fee',
-        'date',
-        'state',
-        'event',
-        'title',
-        'real_name',
-        'phone',
-        'address',
-        'update_time'
-    ];
-
-    protected $table = 'order_201710';
+    protected $connection = 'mysql4';
+    protected $table = 'order_201711';
     public $primaryKey = 'order_id';
     public $timestamps = false;
 

@@ -16,10 +16,11 @@ window.Vue = require('vue');
 
 
 Vue.component('Example', require('./components/Example.vue'));
+Vue.component('toodogd', require('./components/ToodoGD/ToodoGD.vue'));
 
 import ElementUI from 'element-ui';
 import Router from 'vue-router';
-import 'element-ui/lib/theme-default/index.css';
+//import 'element-ui/lib/theme-default/index.css';
 
 import router from './router/index';
 
@@ -31,5 +32,5 @@ window.Vue.use(Router);
 
 const app = new Vue({
     el: '#app',
-    router
+    router,
 });

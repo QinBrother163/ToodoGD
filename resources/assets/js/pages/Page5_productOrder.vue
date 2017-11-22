@@ -2,7 +2,7 @@
     <div>
         <el-row>
         <el-row style="margin: 0 0 20px 0;">
-            <el-col :xs="15" :sm="15" :md="10" :lg="10">
+            <el-col :xs="16" :sm="16" :md="10" :lg="10">
             <el-date-picker
                   @change="handleDateRangeChange_val1"
                   v-model="date_val1"
@@ -149,11 +149,14 @@
         </el-row>
     </div>
 </template>
-
+<style>
+    #elDialogMargin{
+        margin: 0 0 !important;
+    }
+</style>
 <script>
 
     import {pageUrl} from '../app/PageUrl';
-
     export default {
         data() {
             return {

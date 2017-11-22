@@ -13,6 +13,16 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/element-ui.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui@2.0.4/lib/theme-chalk/index.css">
+    <style type="text/css">
+        .el-dialog{
+            margin: 0 0;
+        }
+        .el-date-picker {
+            width: 322px !important;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -38,7 +48,17 @@
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
-                        &nbsp;
+
+                        <el-dropdown style="padding: 14px 15px">
+                            <li class="el-dropdown-link">
+                                下拉菜单<i class="el-icon-arrow-down el-icon--right"></i>
+                            </li>
+                            <el-dropdown-menu slot="dropdown">
+                                <el-dropdown-item><a href="{{ url('/toodogd') }}">广东联通</a></el-dropdown-item>
+                                <el-dropdown-item><a href="{{ url('/home') }}">广东广电</a></el-dropdown-item>
+                            </el-dropdown-menu>
+                        </el-dropdown>
+
                     </ul>
 
                     <!-- Right Side Of Navbar -->

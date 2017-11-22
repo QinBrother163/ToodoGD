@@ -24,1956 +24,75 @@ class mgpayrecordController extends Controller
         $order_status = $request->input('order_status');//设备状态
         $inputFacility = $request->input('inputFacility');//输入设备
 
-        $tmp_date = date("Ym");
-        //切割出年份
-        $tmp_year = substr($tmp_date, 0, 4);
-        //切割出月份
-        $tmp_mon = substr($tmp_date, 4, 2);
-        $lastLastMonth = mktime(0, 0, 0, $tmp_mon - 2, 1, $tmp_year);
-        $lastMonth = mktime(0, 0, 0, $tmp_mon - 1, 1, $tmp_year);
-
-        $lastLastMonth = date("Ym", $lastLastMonth);
-        $lastMonth = date("Ym", $lastMonth);
         $currentMonth = date("Ym");
-        $end_list = explode('-', $end);
-        $begin_list = explode('-', $begin);
 
-        $amountNumber3 = '3';//金额长度
-        $amountNumber2 = '2';
-        $amountNumber1 = '1';
-
-        $verifyStatus0 = '5';//设备状态 【0 飞奔】【1 拓捷】【10 不限】
-        $verifyStatus0_0 = '0';//设备状态 【0 飞奔】【1 拓捷】【10 不限】
-        $verifyStatus1 = '1';
-        $verifyStatus10 = '10';
-
-
-        if ($inputFacility && $order_status && $amount_list && ($begin && $end)) {
-
-            $amount_arr_list = explode(',', $amount_list);
-            $begin = date('Y-m-d', strtotime($begin));
-            $end = date('Y-m-d', strtotime($end));
-            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
-
-            if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '2') {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]))->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]))->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                }
-
-            } else if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '1') {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                }
-
-            } else if ($begin_list[0] . $begin_list[1] == $end_list[0] . $end_list[1]) {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-                    }
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        where('devNO', $inputFacility)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-                    }
-                }
-
+        function processingPaging2($paginate1, $paginate2, $size, $request)
+    {
+
+        $collection = collect([$paginate1, $paginate2]);
+        $collapsed = $collection->collapse();
+        $collapsed->all();
+
+        if ($request->has('page')) {
+            $current_page = $request->input('page');
+            $current_page = $current_page <= 0 ? 1 : $current_page;
+        } else {
+            $current_page = 1;
+        }
+        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
+        $total = count($collapsed);
+
+        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
+            'path' => Paginator::resolveCurrentPath(),  //注释2
+            'pageName' => 'page',
+        ]);
+        return $paginator;
+
+    }
+
+        function processingPaging3($paginate1, $paginate2, $paginate3, $size, $request)
+        {
+
+            $collection = collect([$paginate1, $paginate2, $paginate3]);
+            $collapsed = $collection->collapse();
+            $collapsed->all();
+
+            if ($request->has('page')) {
+                $current_page = $request->input('page');
+                $current_page = $current_page <= 0 ? 1 : $current_page;
+            } else {
+                $current_page = 1;
             }
-
-        } else if ($order_status && $amount_list && ($begin && $end)) {
-            $amount_arr_list = explode(',', $amount_list);
-            $begin = date('Y-m-d', strtotime($begin));
-            $end = date('Y-m-d', strtotime($end));
-            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
-
-            if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '2') {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                        whereIn('price', [$arr_list_0])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate3, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                }
-
-            } else if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '1') {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0, $arr_list_1])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                        whereIn('price', [$arr_list_0])->
-                        whereBetween('createDate', [$begin, $end])->
-                        get();
-
-                        $collection = collect([$paginate1, $paginate2]);
-                        $collapsed = $collection->collapse();
-                        $collapsed->all();
-
-                        if ($request->has('page')) {
-                            $current_page = $request->input('page');
-                            $current_page = $current_page <= 0 ? 1 : $current_page;
-                        } else {
-                            $current_page = 1;
-                        }
-                        $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                        $total = count($collapsed);
-
-                        $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                            'path' => Paginator::resolveCurrentPath(),  //注释2
-                            'pageName' => 'page',
-                        ]);
-                        return $paginator;
-
-                    }
-                }
-
-            } else if ($begin_list[0] . $begin_list[1] == $end_list[0] . $end_list[1]) {
-
-                if (count($amount_arr_list) == $amountNumber3) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-                    $arr_list_2 = $amount_arr_list[2];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber2) {
-                    $arr_list_0 = $amount_arr_list[0];
-                    $arr_list_1 = $amount_arr_list[1];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0, $arr_list_1])->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-                    }
-
-                } elseif (count($amount_arr_list) == $amountNumber1) {
-                    $arr_list_0 = $amount_arr_list[0];
-
-                    if ($order_status == $verifyStatus0) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        where('CPID', $verifyStatus0_0)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus1) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        where('CPID', $order_status)->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-
-                    } elseif ($order_status == $verifyStatus10) {
-
-                        $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->whereIn('price', [$arr_list_0])->
-                        whereBetween('createDate', [$begin, $end])->
-                        paginate($size);
-                        return $paginate;
-                    }
-                }
-
-            }
-
-        } elseif ($inputFacility && ($begin && $end)) {
-            $begin = date('Y-m-d', strtotime($begin));
-            $end = date('Y-m-d', strtotime($end));
-            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
-
-            if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '2') {
-
-                $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                where('devNO', $inputFacility)->
-                whereBetween('createDate', [$begin, $end])->
-                get();
-
-                $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                where('devNO', $inputFacility)->
-                whereBetween('createDate', [$begin, $end])->
-                get();
-
-                $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                where('devNO', $inputFacility)->
-                get();
-
-                $collection = collect([$paginate1, $paginate3 ,$paginate2]);
-                $collapsed = $collection->collapse();
-                $collapsed->all();
-
-                if ($request->has('page')) {
-                    $current_page = $request->input('page');
-                    $current_page = $current_page <= 0 ? 1 : $current_page;
-                } else {
-                    $current_page = 1;
-                }
-                $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                $total = count($collapsed);
-
-                $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                    'path' => Paginator::resolveCurrentPath(),  //注释2
-                    'pageName' => 'page',
-                ]);
-                return $paginator;
-
-            }else if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '1') {
-
-                $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                where('devNO', $inputFacility)->
-                whereBetween('createDate', [$begin, $end])->
-                get();
-
-                $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                where('devNO', $inputFacility)->
-                whereBetween('createDate', [$begin, $end])->
-                get();
-
-                $collection = collect([$paginate1, $paginate2]);
-                $collapsed = $collection->collapse();
-                $collapsed->all();
-
-                if ($request->has('page')) {
-                    $current_page = $request->input('page');
-                    $current_page = $current_page <= 0 ? 1 : $current_page;
-                } else {
-                    $current_page = 1;
-                }
-                $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                $total = count($collapsed);
-
-                $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                    'path' => Paginator::resolveCurrentPath(),  //注释2
-                    'pageName' => 'page',
-                ]);
-                return $paginator;
-
-            }else if ($begin_list[0] . $begin_list[1] == $end_list[0] . $end_list[1]) {
-
-                $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
-                where('devNO', $inputFacility)->
-                whereBetween('createDate', [$begin, $end])->
-                paginate($size);
-                return $paginate;
-
-            }
-
-        } else if ($inputFacility && $order_status && $amount_list) {
-            $amount_arr_list = explode(',', $amount_list);
-
-            if (count($amount_arr_list) == $amountNumber3) {
-
-                $arr_list_0 = $amount_arr_list[0];
-                $arr_list_1 = $amount_arr_list[1];
-                $arr_list_2 = $amount_arr_list[2];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    where('CPID', $verifyStatus0_0)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    where('CPID', $order_status)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-                }
-            } elseif (count($amount_arr_list) == $amountNumber2) {
-
-                $arr_list_0 = $amount_arr_list[0];
-                $arr_list_1 = $amount_arr_list[1];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1])->
-                    where('CPID', $verifyStatus0_0)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1])->
-                    where('CPID', $order_status)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0, $arr_list_1])->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-                }
-            } elseif (count($amount_arr_list) == $amountNumber1) {
-
-                $arr_list_0 = $amount_arr_list[0];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0])->
-                    where('CPID', $verifyStatus0_0)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0])->
-                    where('CPID', $order_status)->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->whereIn('price', [$arr_list_0])->
-                    where('devNO', $inputFacility)->
-                    paginate($size);
-                    return $paginate;
-                }
-            }
-
-
-        } elseif ($order_status && $amount_list) {
-            $amount_arr_list = explode(',', $amount_list);
-
-            if (count($amount_arr_list) == $amountNumber3) {
-
-                $arr_list_0 = $amount_arr_list[0];
-                $arr_list_1 = $amount_arr_list[1];
-                $arr_list_2 = $amount_arr_list[2];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    where('CPID', $verifyStatus0_0)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    where('CPID', $order_status)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1, $arr_list_2])->
-                    paginate($size);
-                    return $paginate;
-
-                }
-
-            } elseif (count($amount_arr_list) == $amountNumber2) {
-                $arr_list_0 = $amount_arr_list[0];
-                $arr_list_1 = $amount_arr_list[1];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1])->
-                    where('CPID', $verifyStatus0_0)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1])->
-                    where('CPID', $order_status)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0, $arr_list_1])->
-                    paginate($size);
-                    return $paginate;
-
-                }
-            } elseif (count($amount_arr_list) == $amountNumber1) {
-                $arr_list_0 = $amount_arr_list[0];
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0])->
-                    where('CPID', $verifyStatus0_0)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0])->
-                    where('CPID', $order_status)->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
-                    $paginate = mgpayrecord::query($currentMonth)->
-                    whereIn('price', [$arr_list_0])->
-                    paginate($size);
-                    return $paginate;
-
-                }
-            }
-
-        } elseif ($inputFacility) {
-
-            $paginate = mgpayrecord::query($currentMonth)->where('devNO', $inputFacility)->
+            $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
+            $total = count($collapsed);
+
+            $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
+                'path' => Paginator::resolveCurrentPath(),  //注释2
+                'pageName' => 'page',
+            ]);
+            return $paginator;
+
+        }
+
+        function query($currentMonth, $begin, $end, $inputFacility, $size)
+        {
+            $paginate = mgpayrecord::query($currentMonth)->
+            orderBy('createDate')->
             paginate($size);
             return $paginate;
+        }
 
-        } elseif ($order_status && ($begin && $end)) {
-
+        function query_date($currentMonth, $begin, $end, $inputFacility, $size, $request)
+        {
             $begin = date('Y-m-d', strtotime($begin));
             $end = date('Y-m-d', strtotime($end));
             $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
 
-            if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '2') {
+            $end_list = explode('-', $end);
+            $begin_list = explode('-', $begin);
 
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                    where('CPID', $verifyStatus0_0)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $verifyStatus0_0)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                    where('CPID', $verifyStatus0_0)->
-                    get();
-
-                    $collection = collect([$paginate1, $paginate3, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                    where('CPID', $order_status)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $order_status)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
-                    where('CPID', $order_status)->
-                    get();
-
-                    $collection = collect([$paginate1, $paginate3, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-
-                } elseif ($order_status == $verifyStatus10) {
-
+            switch ((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) {
+                case 2:
                     $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
                     whereBetween('createDate', [$begin, $end])->
                     get();
@@ -1985,92 +104,9 @@ class mgpayrecordController extends Controller
                     $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
                     get();
 
-                    $collection = collect([$paginate1, $paginate3, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-
-                }
-
-            } else if (((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) == '1') {
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                    where('CPID', $verifyStatus0_0)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $verifyStatus0_0)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $collection = collect([$paginate1, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
-                    where('CPID', $order_status)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $order_status)->
-                    whereBetween('createDate', [$begin, $end])->
-                    get();
-
-                    $collection = collect([$paginate1, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-
-                } elseif ($order_status == $verifyStatus10) {
+                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                    break;
+                case 1:
 
                     $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
                     whereBetween('createDate', [$begin, $end])->
@@ -2080,56 +116,878 @@ class mgpayrecordController extends Controller
                     whereBetween('createDate', [$begin, $end])->
                     get();
 
-                    $collection = collect([$paginate1, $paginate2]);
-                    $collapsed = $collection->collapse();
-                    $collapsed->all();
-
-                    if ($request->has('page')) {
-                        $current_page = $request->input('page');
-                        $current_page = $current_page <= 0 ? 1 : $current_page;
-                    } else {
-                        $current_page = 1;
-                    }
-                    $item = array_slice(json_decode(json_encode($collapsed), true), ($current_page - 1) * $size, $size); //注释1
-                    $total = count($collapsed);
-
-                    $paginator = new LengthAwarePaginator($item, $total, $size, $current_page, [
-                        'path' => Paginator::resolveCurrentPath(),  //注释2
-                        'pageName' => 'page',
-                    ]);
-                    return $paginator;
-                }
-
-            } else if ($begin_list[0] . $begin_list[1] == $end_list[0] . $end_list[1]) {
-
-                if ($order_status == $verifyStatus0) {
-
-                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $verifyStatus0_0)->
-                    whereBetween('createDate', [$begin, $end])->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus1) {
-
-                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
-                    where('CPID', $order_status)->
-                    whereBetween('createDate', [$begin, $end])->
-                    paginate($size);
-                    return $paginate;
-
-                } elseif ($order_status == $verifyStatus10) {
-
+                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                    break;
+                default:
                     $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
                     whereBetween('createDate', [$begin, $end])->
+                    orderBy('createDate')->
                     paginate($size);
                     return $paginate;
-
-                }
+                    break;
             }
         }
 
-        $paginate = mgpayrecord::query($currentMonth)->paginate($size);
-        return $paginate;
+        function query_inputFacility($currentMonth, $begin, $end, $inputFacility, $size)
+        {
+            $paginate = mgpayrecord::query($currentMonth)->
+            where('devNO', $inputFacility)->
+            orderBy('createDate')->
+            paginate($size);
+            return $paginate;
+        }
+
+        function query_date_inputFacility($currentMonth, $begin, $end, $inputFacility, $size, $request)
+        {
+            $begin = date('Y-m-d', strtotime($begin));
+            $end = date('Y-m-d', strtotime($end));
+            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
+
+            $end_list = explode('-', $end);
+            $begin_list = explode('-', $begin);
+
+            switch ((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) {
+                case 2:
+                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                    where('devNO', $inputFacility)->
+                    whereBetween('createDate', [$begin, $end])->
+                    get();
+
+                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                    where('devNO', $inputFacility)->
+                    whereBetween('createDate', [$begin, $end])->
+                    get();
+
+                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                    where('devNO', $inputFacility)->
+                    get();
+
+                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                    break;
+                case 1:
+
+                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                    where('devNO', $inputFacility)->
+                    whereBetween('createDate', [$begin, $end])->
+                    get();
+
+                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                    where('devNO', $inputFacility)->
+                    whereBetween('createDate', [$begin, $end])->
+                    get();
+
+                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                    break;
+                default:
+
+                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                    where('devNO', $inputFacility)->
+                    whereBetween('createDate', [$begin, $end])->
+                    orderBy('createDate')->
+                    paginate($size);
+                    return $paginate;
+                    break;
+            }
+        }
+
+        function query_order_status($currentMonth, $begin, $end, $order_status, $inputFacility, $size)
+        {
+
+            $verifyStatus0 = '0';
+
+            switch ($order_status) {
+                case 1:
+                    $paginate = mgpayrecord::query($currentMonth)->
+                    where('CPID', $order_status)->
+                    orderBy('createDate')->
+                    paginate($size);
+                    return $paginate;
+                    break;
+                case 10:
+                    $paginate = mgpayrecord::query($currentMonth)->
+                    orderBy('createDate')->
+                    paginate($size);
+                    return $paginate;
+                    break;
+                default:
+                    $paginate = mgpayrecord::query($currentMonth)->
+                    where('CPID', $verifyStatus0)->
+                    orderBy('createDate')->
+                    paginate($size);
+                    return $paginate;
+                    break;
+            }
+        }
+
+        function query_date_orderStatus($currentMonth, $begin, $end, $order_status, $inputFacility, $size, $request)
+        {
+            $begin = date('Y-m-d', strtotime($begin));
+            $end = date('Y-m-d', strtotime($end));
+            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
+
+            $end_list = explode('-', $end);
+            $begin_list = explode('-', $begin);
+
+            $verifyStatus0 = '0';
+
+            switch ((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) {
+                case 2:
+                    switch ($order_status) {
+                        case 1:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            where('CPID', $order_status)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $order_status)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                            where('CPID', $order_status)->
+                            get();
+
+                            return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                            break;
+                        case 10:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                            get();
+
+                            return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                            break;
+                        default:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            where('CPID', $verifyStatus0)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $verifyStatus0)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                            where('CPID', $verifyStatus0)->
+                            get();
+                            return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch ($order_status) {
+                        case 1:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            where('CPID', $order_status)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $order_status)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            return processingPaging2($paginate1, $paginate2, $size, $request);
+                            break;
+                        case 10:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            return processingPaging2($paginate1, $paginate2, $size, $request);
+                            break;
+                        default:
+                            $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                            where('CPID', $verifyStatus0)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $verifyStatus0)->
+                            whereBetween('createDate', [$begin, $end])->
+                            get();
+
+                            return processingPaging2($paginate1, $paginate2, $size, $request);
+
+                            break;
+                    }
+                    break;
+                default:
+                    switch ($order_status) {
+                        case 1:
+                            $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $order_status)->
+                            whereBetween('createDate', [$begin, $end])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case 10:
+                            $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            whereBetween('createDate', [$begin, $end])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        default:
+                            $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                            where('CPID', $verifyStatus0)->
+                            whereBetween('createDate', [$begin, $end])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                    }
+
+                    break;
+            }
+        }
+
+        function query_amount_orderStatus($currentMonth, $begin, $end, $amount_list, $order_status, $inputFacility, $size)
+        {
+
+            $amount_arr = explode(',', $amount_list);
+
+            $amountNumber3 = '3';//金额长度
+            $amountNumber2 = '2';
+            $amountNumber1 = '1';
+
+            $verifyStatus0 = '0';
+
+            switch ($order_status) {
+                case 1:
+                    switch (count($amount_arr)) {
+                        case $amountNumber3:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                            where('CPID', $order_status)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber2:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                            where('CPID', $order_status)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber1:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0]])->
+                            where('CPID', $order_status)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case 10:
+                    switch (count($amount_arr)) {
+                        case $amountNumber3:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber2:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber1:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0]])->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    switch (count($amount_arr)) {
+                        case $amountNumber3:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                            where('CPID', $verifyStatus0)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber2:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                            where('CPID', $verifyStatus0)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        case  $amountNumber1:
+                            $paginate = mgpayrecord::query($currentMonth)->
+                            whereIn('price', [$amount_arr[0]])->
+                            where('CPID', $verifyStatus0)->
+                            orderBy('createDate')->
+                            paginate($size);
+                            return $paginate;
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        function query_date_amount_orderStatus($currentMonth, $begin, $end, $amount_list, $order_status, $inputFacility, $size, $request)
+        {
+            $begin = date('Y-m-d', strtotime($begin));
+            $end = date('Y-m-d', strtotime($end));
+            $end = date('Y-m-d', strtotime('+1 day', strtotime($end)));
+
+            $end_list = explode('-', $end);
+            $begin_list = explode('-', $begin);
+
+            $amount_arr = explode(',', $amount_list);
+
+            $amountNumber3 = '3';//金额长度
+            $amountNumber2 = '2';
+            $amountNumber1 = '1';
+
+            $verifyStatus0 = '0';
+
+            switch ((int)($end_list[0] . $end_list[1]) - (int)($begin_list[0] . $begin_list[1])) {
+                case 2:
+                    switch ($order_status) {
+                        case 1:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case 10:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate3 = mgpayrecord::query((int)($begin_list[0] . $begin_list[1]) + 1)->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging3($paginate1, $paginate3, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case 1:
+                    switch ($order_status) {
+                        case 1:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case 10:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate1 = mgpayrecord::query($begin_list[0] . $begin_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    $paginate2 = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    get();
+
+                                    return processingPaging2($paginate1, $paginate2, $size, $request);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                default:
+                    switch ($order_status) {
+                        case 1:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $order_status)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case 10:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            switch (count($amount_arr)) {
+                                case $amountNumber3:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1], $amount_arr[2]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber2:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0], $amount_arr[1]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                case  $amountNumber1:
+                                    $paginate = mgpayrecord::query($end_list[0] . $end_list[1])->
+                                    whereIn('price', [$amount_arr[0]])->
+                                    where('CPID', $verifyStatus0)->
+                                    whereBetween('createDate', [$begin, $end])->
+                                    orderBy('createDate')->
+                                    paginate($size);
+                                    return $paginate;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        if ($begin && $end && $amount_list && $order_status) {
+            return query_date_amount_orderStatus($currentMonth, $begin, $end, $amount_list, $order_status, $inputFacility, $size, $request);
+        } elseif ($begin && $end && $order_status) {
+            return query_date_orderStatus($currentMonth, $begin, $end, $order_status, $inputFacility, $size, $request);
+        } elseif ($begin && $end && $inputFacility) {
+            return query_date_inputFacility($currentMonth, $begin, $end, $inputFacility, $size, $request);
+        } elseif ($amount_list && $order_status) {
+            return query_amount_orderStatus($currentMonth, $begin, $end, $amount_list, $order_status, $inputFacility, $size);
+        } elseif ($begin && $end) {
+            return query_date($currentMonth, $begin, $end, $inputFacility, $size, $request);
+        } elseif ($inputFacility) {
+            return query_inputFacility($currentMonth, $begin, $end, $inputFacility, $size);
+        } elseif ($order_status) {
+            return query_order_status($currentMonth, $begin, $end, $order_status, $inputFacility, $size);
+        }
+
+        return query($currentMonth, $begin, $end, $inputFacility, $size);
+
     }
 }
